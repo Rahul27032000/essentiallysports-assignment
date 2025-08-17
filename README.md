@@ -1,7 +1,43 @@
 # EssentiallySports Backend Assignment
 
-This project is a backend service designed to ensure **content feed compliance** for external syndication feeds (e.g., MSN, Google News).  
-It validates and processes articles before sending them to external partners, ensuring adherence to partner-specific guidelines and minimizing compliance failures.
+## 📌 Project Description
+
+This project is a backend service that ensures content feed compliance for external syndication feeds such as MSN and Google News.
+
+The system is responsible for:
+
+Validating incoming articles against partner-specific compliance rules (title length, formatting, prohibited topics, etc.).
+
+Processing and transforming articles into the format required by each external partner.
+
+Publishing compliant content to partners while blocking or rejecting non-compliant submissions.
+
+## ⚠️ Failure Handling & Monitoring
+
+All compliance or publishing failures are logged in the AuditLog table.
+
+Each log entry captures the article ID, partner code, status code, error details, and timestamp.
+
+These logs provide traceability and can be used later to build monitoring dashboards or charts.
+
+In addition, failure events are sent to a Microsoft Teams channel for real-time visibility by the editorial/engineering team. (simulated for now but can implement if get the teamid)
+
+This ensures that compliance issues are not only stored but also actively monitored.
+
+## 📊 AuditLog for Analytics
+
+The AuditLog data can be used for:
+
+Tracking failure trends per partner.
+
+Identifying frequent validation errors (e.g., missing thumbnails, title too long).
+
+Generating compliance reports and charts (e.g., success vs failure rate).
+
+Driving new features (e.g., automated pre-checks before submission).
+
+## ✅ In short:
+This service not only guarantees content compliance with partners like MSN/Google but also provides visibility into failures (Teams alerts) and monitoring insights (AuditLog analytics) to help prevent repeated issues.
 
 ---
 
