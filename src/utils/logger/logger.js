@@ -1,6 +1,6 @@
-import { createLogger, format, transports } from "winston";
+import { createLogger, format } from "winston";
 import Transport from "winston-transport";
-import { executeQuery } from "../../utlis/executeQuery.js"
+import { executeQuery } from "../executeQuery.js";
 
 class PrismaTransport extends Transport {
   constructor(opts) {
@@ -9,19 +9,40 @@ class PrismaTransport extends Transport {
 
   async log(info, callback) {
     process.nextTick(() => this.emit("logged", info));
-    try {
 
+    const {
+      requestCode = "UNKNOWN",
+      requestType = "INTERNAL",
+      requestMethod = "UNKNOWN",
+      requestUrl = "UNKNOWN",
+      responseStatusCode = 500,
+      log: logData = {},
+    } = info.message || {};
+
+    const timestamp = info.timestamp ? new Date(info.timestamp) : new Date();
+
+    try {
       await executeQuery({
         text: `
-        insert into "RequestLog"
-        ("userId", "requestCode", "requestType", "requestMethod", "requestUrl", "requestedAt", "responseStatusCode", "responseAt", "log") 
-        values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          INSERT INTO "RequestLog"
+          ("requestCode", "requestType", "requestMethod", "requestUrl", "requestedAt", "responseStatusCode", "responseAt", "log")
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         `,
-        values: [info.userId ?? null, info.message.requestCode ?? "UNKNOWN", info.message.requestType ?? "INTERNAL", info.message.requestMethod ?? "UNKNOWN", info.message.requestUrl ?? "UNKNOWN", new Date(info.timestamp) ?? new Date(), info.message.responseStatusCode ?? 500, new Date(), info.message.log ?? {}]
-      })
+        values: [
+          requestCode,
+          requestType,
+          requestMethod,
+          requestUrl,
+          timestamp,
+          responseStatusCode,
+          new Date(),
+          logData,
+        ],
+      });
     } catch (error) {
       console.error("Error logging to Prisma:", error);
     }
+
     callback();
   }
 }

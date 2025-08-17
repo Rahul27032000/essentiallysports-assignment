@@ -45,3 +45,20 @@ model Partner{
 
 
 
+model RequestLog {
+  id                 Int         @id @default(autoincrement())
+  requestCode        String
+  requestType        requestType
+  requestMethod      String
+  requestUrl         String
+  requestedAt        DateTime    @default(now()) @db.Timestamptz(3)
+  responseStatusCode Int
+  responseAt         DateTime    @db.Timestamptz(3)
+  log                Json
+}
+
+enum requestType {
+  INBOUND
+  OUTBOUND
+  INTERNAL
+}
