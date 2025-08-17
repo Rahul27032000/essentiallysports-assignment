@@ -16,7 +16,7 @@ datasource db {
 
 
 model AuditLog {
-  id        String   @id @default(uuid())
+  id             Int              @id @default(autoincrement())
   articleId String
   partnerCode      String
   timestamp DateTime @default(now())
@@ -33,7 +33,7 @@ enum ArticleStatus {
 
 
 model Partner{
-  id        String   @id @default(uuid())
+  id             Int              @id @default(autoincrement())
   name      String
   code      String
   description String
@@ -46,7 +46,7 @@ model Partner{
 
 
 model RequestLog {
-  id                 Int         @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   requestCode        String
   requestType        requestType
   requestMethod      String

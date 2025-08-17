@@ -39,7 +39,6 @@ async function seed() {
         text: `
           INSERT INTO "Partner" (name, code, description, config, "validationConfig")
           VALUES ($1, $2, $3, $4, $5)
-          ON CONFLICT (code) DO NOTHING;
         `,
         values: [
           partner.name,

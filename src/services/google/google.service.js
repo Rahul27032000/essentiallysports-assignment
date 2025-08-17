@@ -1,7 +1,7 @@
 import { ENVIRONMENT } from "../../config/config.js";
-import { APIGenericError } from "../../utils/errors/APIGenericError.js";
 import { AxiosError } from "axios";
 import { GoogleProvider } from "./googleProvider.js";
+import { APIGenericError } from "../../errorHandlers/APIErrorHandler.js";
 
 export const publishArticleToGoogle = async (article, config) => {
   if (ENVIRONMENT === "staging" || ENVIRONMENT === "dev") {

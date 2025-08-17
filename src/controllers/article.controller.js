@@ -1,6 +1,6 @@
 // controllers/article.controller.js
+import { APIGenericError } from "../errorHandlers/APIErrorHandler.js";
 import { primaryProcessingService } from "../services/article.service.js";
-import { APIGenericError } from "../utils/errors.js";
 import { errorCodes, errorMessages } from "../utils/constants.js";
 
 export const processArticleController = async (req, res, next) => {

@@ -1,8 +1,8 @@
-import { getActivePartners } from "../utils/partners.js";
-import { validateRequiredFields } from "../utils/validateRequiredFields.js";
 import { createAuditLog } from "../utils/auditLogger.js";
 import { PROVIDER_HANDLERS } from "../config/constants/providerConfig.js";
-import { APIGenericError } from "../utils/errors.js";
+import { APIGenericError } from "../errorHandlers/APIErrorHandler.js";
+import { getActivePartners } from "../utils/partnerUtils.js";
+import { validateRequiredFields } from "../validators/fieldValitors.js";
 
 export const primaryProcessingService = async (article) => {
   const partners = await getActivePartners();
@@ -52,10 +52,14 @@ export const primaryProcessingService = async (article) => {
       );
 
       if (foundInTitle.length) {
-        partnerErrors.push(`Prohibited words in title: ${foundInTitle.join(", ")}`);
+        partnerErrors.push(
+          `Prohibited words in title: ${foundInTitle.join(", ")}`
+        );
       }
       if (foundInBody.length) {
-        partnerErrors.push(`Prohibited words in body: ${foundInBody.join(", ")}`);
+        partnerErrors.push(
+          `Prohibited words in body: ${foundInBody.join(", ")}`
+        );
       }
     }
 
@@ -69,7 +73,11 @@ export const primaryProcessingService = async (article) => {
         status: "FAILED",
       });
 
-      await sendToTeams({ articleId: article.id, title: article.title, errors: partnerErrors });
+      await sendToTeams({
+        articleId: article.id,
+        title: article.title,
+        errors: partnerErrors,
+      });
 
       throw new APIGenericError(
         "VALIDATION_FAILED",

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { logger } from "./utils/logger/logger.js";
 import { serverErrorHandler } from "./errorHandlers/serverErrorHandler.js";
-// import router from "./routes/index.js";
+import router from "./routes/index.js";
 
 const app = express();
 
@@ -60,7 +60,7 @@ app.use((req, res, next) => {
 });
 
 
-// app.use("/api", router);
+app.use("/api/v1", router);
 
 app.get("/", async (_req, res, next) => {
   try {
