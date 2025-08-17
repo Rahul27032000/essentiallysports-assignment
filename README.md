@@ -12,6 +12,14 @@ Processing and transforming articles into the format required by each external p
 
 Publishing compliant content to partners while blocking or rejecting non-compliant submissions.
 
+## ⚙️ Config-Driven Compliance
+
+Partner-specific compliance rules are stored in the database (in the Partner table’s config and validationConfig fields).
+
+This means compliance checks can be updated instantly by modifying database configurations — no code deployment is required.
+
+Adding a new partner integration requires very little code; most partner behavior is controlled directly from the database for simplicity and flexibility.
+
 ## ⚠️ Failure Handling & Monitoring
 
 All compliance or publishing failures are logged in the AuditLog table.
