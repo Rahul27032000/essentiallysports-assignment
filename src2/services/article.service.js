@@ -6,104 +6,97 @@ import { APIGenericError } from "../utils/errors.js";
 
 export const primaryProcessingService = async (article) => {
   const partners = await getActivePartners();
-  const allErrors = [];
 
   for (const partner of partners) {
     const { codeName, config, validationConfig } = partner;
     const partnerErrors = [];
 
-    try {
-      // ✅ Required fields
-      if (validationConfig?.requiredFields?.length > 0) {
-        try {
-          validateRequiredFields(article, validationConfig.requiredFields);
-        } catch (err) {
-          partnerErrors.push(err.message);
-        }
+    // ✅ Required fields
+    if (validationConfig?.requiredFields?.length) {
+      try {
+        validateRequiredFields(article, validationConfig.requiredFields);
+      } catch (err) {
+        partnerErrors.push(err.message);
       }
+    }
 
-      // ✅ Title length
-      if (
-        validationConfig?.titleLength &&
-        (article.title.length < validationConfig.titleLength.min ||
-          article.title.length > validationConfig.titleLength.max)
-      ) {
-        partnerErrors.push(
-          `Title length must be between ${validationConfig.titleLength.min} and ${validationConfig.titleLength.max}`
-        );
+    // ✅ Title length
+    if (
+      validationConfig?.titleLength &&
+      (article.title.length < validationConfig.titleLength.min ||
+        article.title.length > validationConfig.titleLength.max)
+    ) {
+      partnerErrors.push(
+        `Title length must be between ${validationConfig.titleLength.min} and ${validationConfig.titleLength.max}`
+      );
+    }
+
+    // ✅ Body length
+    if (
+      validationConfig?.bodyLength &&
+      (article.body.length < validationConfig.bodyLength.min ||
+        article.body.length > validationConfig.bodyLength.max)
+    ) {
+      partnerErrors.push(
+        `Body length must be between ${validationConfig.bodyLength.min} and ${validationConfig.bodyLength.max}`
+      );
+    }
+
+    // ✅ Prohibited words in title and body
+    if (validationConfig?.prohibitedWords?.length) {
+      const foundInTitle = validationConfig.prohibitedWords.filter((word) =>
+        article.title.includes(word)
+      );
+      const foundInBody = validationConfig.prohibitedWords.filter((word) =>
+        article.body.includes(word)
+      );
+
+      if (foundInTitle.length) {
+        partnerErrors.push(`Prohibited words in title: ${foundInTitle.join(", ")}`);
       }
-
-      // ✅ Body length
-      if (
-        validationConfig?.bodyLength &&
-        (article.body.length < validationConfig.bodyLength.min ||
-          article.body.length > validationConfig.bodyLength.max)
-      ) {
-        partnerErrors.push(
-          `Body length must be between ${validationConfig.bodyLength.min} and ${validationConfig.bodyLength.max}`
-        );
+      if (foundInBody.length) {
+        partnerErrors.push(`Prohibited words in body: ${foundInBody.join(", ")}`);
       }
+    }
 
-      // ✅ Prohibited words
-      if (validationConfig?.prohibitedWords?.length > 0) {
-        const found = validationConfig.prohibitedWords.filter((word) =>
-          article.body.includes(word)
-        );
-        if (found.length > 0) {
-          partnerErrors.push(`Prohibited words found: ${found.join(", ")}`);
-        }
-      }
-
-      // ✅ Final decision for this partner
-      if (partnerErrors.length === 0) {
-        // Success case
-        await createAuditLog({
-          articleId: article.id,
-          partnerCode: codeName,
-          statusCode: 200,
-          log: { message: "Content published successfully" },
-          status: "SUCCESS",
-        });
-      } else {
-        // Failure case → send all errors in one JSON
-        allErrors.push({ partner: codeName, errors: partnerErrors });
-
-        const handler = PROVIDER_HANDLERS[codeName.toLowerCase()];
-        if (!handler) {
-          throw new APIGenericError(
-            "NO_HANDLER",
-            500,
-            `No handler found for provider: ${codeName}`
-          );
-        }
-
-        await handler("article", article, config);
-
-        await createAuditLog({
-          articleId: article.id,
-          partnerCode: codeName,
-          statusCode: 400,
-          log: { errors: partnerErrors },
-          status: "FAILED",
-        });
-      }
-    } catch (err) {
-      // Catch runtime errors
-      allErrors.push({ partner: codeName, errors: [err.message] });
-
+    // ✅ If there are validation errors → log and throw
+    if (partnerErrors.length) {
       await createAuditLog({
         articleId: article.id,
         partnerCode: codeName,
-        statusCode: 500,
-        log: { errors: [err.message] },
+        statusCode: 400,
+        log: { errors: partnerErrors },
         status: "FAILED",
       });
-    }
-  }
 
-  // Final response
-  if (allErrors.length > 0) {
-    return { success: false, errors: allErrors };
+      throw new APIGenericError(
+        "VALIDATION_FAILED",
+        400,
+        `Validation failed for partner ${codeName}`,
+        partnerErrors
+      );
+    }
+
+    // ✅ Call provider handler
+    const handler = PROVIDER_HANDLERS[codeName.toLowerCase()];
+    if (!handler) {
+      throw new APIGenericError(
+        "NO_HANDLER",
+        500,
+        `No handler found for provider: ${codeName}`
+      );
+    }
+
+    const result = await handler("article", article, config);
+
+    // ✅ If provider call succeeds → log success
+    await createAuditLog({
+      articleId: article.id,
+      partnerCode: codeName,
+      statusCode: 200,
+      log: { message: "Content published successfully", response: result },
+      status: "SUCCESS",
+    });
   }
 
   return { success: true, message: "Article processed for all partners" };
