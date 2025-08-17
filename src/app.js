@@ -62,7 +62,7 @@ app.use((req, res, next) => {
 
 app.use("/api/v1", router);
 
-app.get("/", async (_req, res, next) => {
+app.get("/health", async (_req, res, next) => {
   try {
     res.json({ message: "server is working fine" });
   } catch (err) {
