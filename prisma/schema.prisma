@@ -20,9 +20,9 @@ model AuditLog {
   articleId String
   partnerCode      String
   timestamp DateTime @default(now())
-  results   Json
+  log   Json
+  statusCode Int
   status ArticleStatus @default(PENDING)
-  outcome   String
 }
 
 enum ArticleStatus {

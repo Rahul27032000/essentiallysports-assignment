@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
-import router from "./routes/index.js";
-import { logger } from "./utils/logging.js";
+// import router from "./routes/index.js";
 
 const app = express();
 
@@ -12,8 +11,6 @@ app.use((req, res, next) => {
   req.startTime = Date.now();
   next();
 });
-
-
 
 app.use((req, res, next) => {
   const originalJson = res.json;
@@ -26,37 +23,8 @@ app.use((req, res, next) => {
   res.json = res.sendResponse;
   next();
 });
-app.use((req, res, next) => {
-  res.on("finish", () => {
-    console.log("we came here as well");
 
-    if (req.method === "OPTIONS") return;
-
-    const duration = Date.now() - req.startTime;
-
-    const logEntry = {
-      requestCode: req?.url.split("/").join("_").toUpperCase().slice(1),
-      requestMethod: req.method,
-      requestUrl: req.originalUrl,
-      responseStatusCode: res.statusCode,
-      log: {
-        requestBody: req.body,
-        requestHeaders: req.headers,
-        ip: req.ip || req.socket?.remoteAddress,
-        responseBody: res.locals.body,
-        responseHeaders: res.getHeaders(),
-        duration,
-      },
-      timestamp: new Date().toISOString(),
-    };
-
-    logger.info(logEntry);
-  });
-
-  next();
-});
-
-app.use("/api", router);
+// app.use("/api", router);
 
 app.get("/", async (_req, res, next) => {
   try {
