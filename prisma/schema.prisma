@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  articleId String
+  partnerCode      String
+  timestamp DateTime @default(now())
+  results   Json
+  status ArticleStatus @default(PENDING)
+  outcome   String
+}
+
+enum ArticleStatus {
+  PUBLISHED
+  REJECTED
+  PENDING  
+}
+
+
+model Partner{
+  id        String   @id @default(uuid())
+  name      String
+  code      String
+  description String
+  config      Json
+  validationConfig Json
+  isActive          Boolean @default(true)
+  createAt DateTime @default(now())
+}
+
+
+
