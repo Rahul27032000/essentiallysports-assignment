@@ -5,11 +5,11 @@ export const getActivePartners = async () => {
     text: `
       SELECT code, name, config, "validationConfig"
       FROM "Partner"
-      WHERE active = true
+      WHERE "isActive" = true
     `,
     values: [],
   };
 
-  const result = await executeQuery({text:query});
-  return result.rows; 
+  const result = await executeQuery({ text: query });
+  return result.rows;
 };

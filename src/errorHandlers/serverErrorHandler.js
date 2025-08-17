@@ -8,17 +8,17 @@ function isOperationalError(error) {
 }
 
 export const serverErrorHandler = (error, req, res, next) => {
+  console.log("jhgufhj",error)
   const isOp = error instanceof BaseError && error.isOperational;
 
 
   if (["staging", "development", "local"].includes(ENVIRONMENT) && !isOp) {
-    console.error("ERROR:", error);
+    console.log("ERROR:", error?.message);
   }
 
-  let message = isOp ? error.message : "Internal Server Error";
-
+  let message = isOp ? error.statusCode : "Internal Server Error";
   sendResponse(
-    error.statusCode || 500,
+    error.errorCode || 500,
     false,
     res, 
     null,

@@ -8,7 +8,7 @@ export const sendToTeams = async ({ articleId, title, errors }) => {
   };
 
   try {
-    await axios.post(TEAMS_WEBHOOK_URL, message);
+    // await axios.post(TEAMS_WEBHOOK_URL, message);
   } catch (err) {
     console.error("Failed to send message to Teams:", err.message);
   }
