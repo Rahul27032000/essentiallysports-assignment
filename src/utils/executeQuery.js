@@ -1,19 +1,13 @@
-import { Pool } from 'pg';
-import env from '../config/env.js';
+import pool from "../config/dbConfig.js";
 
-const pool = new Pool({
-  user: env.DB_USER,
-  host: env.DB_HOST,
-  database: env.DB_NAME,
-  password: env.DB_PASSWORD,
-  port: env.DB_PORT,
-});
-
-export async function executeQuery(query, params = []) {
+export const executeQuery = async ({ text, values = [], client = null }) => {
+  const useClient = client || (await pool.connect());
   try {
-    const result = await pool.query(query, params);
-    return result.rows;
-  } catch (error) {
-    throw new Error(`Database query failed: ${error.message}`);
+    const result = await useClient.query(text, values);
+    return result;
+  } finally {
+    if (!client && useClient) {
+      useClient.release(); 
+    }
   }
-}
+};

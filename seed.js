@@ -1,4 +1,4 @@
-import { executeQuery } from "./src2/utils/executeQuery.js";
+import { executeQuery } from "./src/utils/executeQuery.js";
 
 const partners = [
   {

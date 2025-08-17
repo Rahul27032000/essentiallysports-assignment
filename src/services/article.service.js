@@ -69,6 +69,8 @@ export const primaryProcessingService = async (article) => {
         status: "FAILED",
       });
 
+      await sendToTeams({ articleId: article.id, title: article.title, errors: partnerErrors });
+
       throw new APIGenericError(
         "VALIDATION_FAILED",
         400,
